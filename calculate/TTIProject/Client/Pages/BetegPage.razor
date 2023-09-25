@@ -1,0 +1,61 @@
+﻿@page "/teglalapcalc"
+@using System.ComponentModel;
+@using TTIProject.Model;
+
+<h3>Beteg adatok</h3>
+<EditForm Model="@ViewModel" OnValidSubmit="@Compute">
+     <div class="col-4">
+        <div class="form-group">
+            <label for="suly">A oldal</label>
+            <InputText class="form-control" id="aoldal" @bind-Value="@ViewModel.Aoldal"></InputText>
+        </div>
+        <div class="form-group">
+            <label for="magassag">B oldal</label>
+            <InputText class="form-control" id="boldal" @bind-Value="@ViewModel.Boldal"></InputText>
+        </div>
+        <button class="mt-2" type="submit" disabled="@ViewModel.IsBusy">Téglalap terület számolása</button>
+     </div>
+</EditForm>
+<div class="card mt-2 p-2">
+    <h5 class="card-title">Kiértékelés</h5>
+    <div class="card-body">
+        <p>Eredmény: @ViewModel.teglalapEredmeny</p>
+    </div>
+</div>
+
+@code {
+
+    private Beteg ViewModel = new Beteg();
+
+    protected override async Task OnInitializedAsync()
+    {
+        ViewModel.PropertyChanged += async (sender, e) =>
+        {
+            await InvokeAsync(() =>
+            {
+                StateHasChanged();
+            });
+        };
+        await base.OnInitializedAsync();
+    }
+
+    async void OnPropertyChangedHandler(object sender, PropertyChangedEventArgs e)
+    {
+        await InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+    }
+
+    public void Dispose()
+    {
+        ViewModel.PropertyChanged -= OnPropertyChangedHandler;
+    }
+
+    public void Compute()
+    {
+        ViewModel.IsBusy = true;
+        ViewModel.Compute();
+        ViewModel.IsBusy = false;
+    }
+}
